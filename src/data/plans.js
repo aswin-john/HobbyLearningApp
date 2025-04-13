@@ -1,21 +1,20 @@
 export const plans = {
-    Chess: {
-      Beginner: [
-        'Control the Center',
-        'Openings: Italian, Ruy Lopez',
-        'Castling & King Safety',
-        'Simple Tactics',
-        'Endgame Basics',
-      ],
-    },
-    Guitar: {
-      Intermediate: [
-        'Barre Chords',
-        'Scales Practice',
-        'Strumming Patterns',
-        'Fingerstyle Techniques',
-        'Basic Improvisation',
-      ],
-    },
-  };
-  
+  Chess: {
+    Beginner: [
+      'Control the Center',
+      'Openings: Italian Game',
+      'Castling & King Safety',
+      'Basic Tactics',
+      'Simple Endgames',
+    ],
+  },
+  Guitar: {
+    Intermediate: [
+      'Barre Chords',
+      'Pentatonic Scale',
+      'Strumming Patterns',
+      'Fingerstyle Basics',
+      'Solo Improvisation',
+    ],
+  },
+};
