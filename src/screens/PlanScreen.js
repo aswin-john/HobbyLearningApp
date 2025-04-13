@@ -35,10 +35,11 @@ const PlanScreen = ({ route }) => {
         keyExtractor={(item) => item.name}
         renderItem={({ item, index }) => (
           <TechniqueItem
-            technique={item}
-            onPress={() => toggleCompleted(index)}
-            onLongPress={() => toggleSkipped(index)}
-          />
+  technique={item}
+  onToggleComplete={() => toggleCompleted(index)}
+  onToggleSkip={() => toggleSkipped(index)}
+/>
+
         )}
       />
     </View>
