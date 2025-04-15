@@ -1,37 +1,54 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather'; // Optional
+import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
+import Modal from 'react-native-modal';
 
 const hobbyData = [
-  { id: '1', name: 'Chess', icon: '♟️', level: 'Beginner', color: '#F3F4F6' },
-  { id: '2', name: 'Guitar', icon: '🎸', level: 'Intermediate', color: '#FDE68A' },
-  { id: '3', name: 'Running', icon: '🏃', level: 'Beginner', color: '#E9D5FF' },
-  { id: '4', name: 'Music', icon: '🎵', level: 'Beginner', color: '#E0F2FE' },
-  { id: '5', name: 'Reading', icon: '📚', level: 'Beginner', color: '#FEF9C3' },
-  { id: '6', name: 'Cooking', icon: '🍳', level: 'Beginner', color: '#DCFCE7' },
+  { id: '1', name: 'Chess', icon: '♟️', color: '#F3F4F6' },
+  { id: '2', name: 'Guitar', icon: '🎸', color: '#FDE68A' },
+  { id: '3', name: 'Running', icon: '🏃', color: '#E9D5FF' },
+  { id: '4', name: 'Music', icon: '🎵', color: '#E0F2FE' },
+  { id: '5', name: 'Reading', icon: '📚', color: '#FEF9C3' },
+  { id: '6', name: 'Cooking', icon: '🍳', color: '#DCFCE7' },
 ];
+
+const skillLevels = ['Beginner', 'Intermediate', 'Advanced'];
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const [selected, setSelected] = useState(null);
+  const [selectedHobby, setSelectedHobby] = useState(null);
+  const [selectedSkill, setSelectedSkill] = useState(null);
+  const [isModalVisible, setModalVisible] = useState(false);
 
-  const handleSelect = (item) => setSelected(item);
+  const handleHobbySelect = (item) => {
+    setSelectedHobby(item);
+    setSelectedSkill(null); // reset skill
+    setModalVisible(true);  // open skill selector
+  };
+
+  const handleSkillSelect = (skill) => {
+    setSelectedSkill(skill);
+    setModalVisible(false);
+  };
 
   const handleStart = () => {
-    if (selected) {
-      navigation.navigate('Plan', { hobby: selected.name, level: selected.level });
+    if (selectedHobby && selectedSkill) {
+      navigation.navigate('Plan', {
+        hobby: selectedHobby.name,
+        level: selectedSkill,
+      });
     }
   };
 
-  const renderItem = ({ item }) => (
+  const renderHobbyItem = ({ item }) => (
     <TouchableOpacity
       style={[
         styles.tile,
         { backgroundColor: item.color },
-        selected?.id === item.id && styles.selectedTile,
+        selectedHobby?.id === item.id && styles.selectedTile,
       ]}
-      onPress={() => handleSelect(item)}
+      onPress={() => handleHobbySelect(item)}
     >
       <Text style={styles.icon}>{item.icon}</Text>
       <Text style={styles.name}>{item.name}</Text>
@@ -46,19 +63,49 @@ const HomeScreen = () => {
         data={hobbyData}
         numColumns={3}
         keyExtractor={(item) => item.id}
-        renderItem={renderItem}
+        renderItem={renderHobbyItem}
         columnWrapperStyle={styles.grid}
         contentContainerStyle={styles.gridContainer}
       />
 
+
+{selectedHobby && selectedSkill && (
+  <View style={styles.selectedInfo}>
+    <Text style={styles.selectedText}>
+      You chose <Text style={styles.highlight}>{selectedHobby.name}</Text> as your hobby and{' '}
+      <Text style={styles.highlight}>{selectedSkill}</Text> as your skill level.
+    </Text>
+  </View>
+)}
+
+
       <TouchableOpacity
-        style={[styles.startBtn, !selected && { opacity: 0.4 }]}
-        disabled={!selected}
+        style={[styles.startBtn, !(selectedHobby && selectedSkill) && { opacity: 0.4 }]}
+        disabled={!(selectedHobby && selectedSkill)}
         onPress={handleStart}
       >
         <Text style={styles.startText}>Start</Text>
         <Icon name="arrow-right" size={18} color="#fff" />
       </TouchableOpacity>
+
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Select skill level</Text>
+          {skillLevels.map((level, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.skillButton}
+              onPress={() => handleSkillSelect(level)}
+            >
+              <Text style={styles.skillText}>{level}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -120,6 +167,49 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  skillButton: {
+    backgroundColor: '#F3F4F6',
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  skillText: {
+    fontSize: 16,
+    color: '#111827',
+  },
+  selectedInfo: {
+    marginTop: 10,
+    marginBottom: 20,
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  selectedText: {
+    fontSize: 14,
+    color: '#374151',
+    textAlign: 'center',
+  },
+  highlight: {
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  
 });
 
 export default HomeScreen;
