@@ -1,36 +1,41 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const TechniqueItem = ({ technique, onToggleComplete, onToggleSkip }) => {
-  const isCompleted = technique.completed;
-  const isSkipped = technique.skipped;
+  const { name, completed, skipped } = technique;
 
   return (
-    <View style={[styles.item, isCompleted && styles.completed, isSkipped && styles.skipped]}>
+    <View
+      style={[
+        styles.card,
+        completed && styles.completedCard,
+        skipped && styles.skippedCard,
+      ]}
+    >
       <View style={styles.row}>
         <TouchableOpacity onPress={onToggleComplete}>
           <Icon
-            name={isCompleted ? 'check-box' : 'check-box-outline-blank'}
+            name={completed ? 'check-box' : 'check-box-outline-blank'}
             size={24}
-            color={isCompleted ? 'green' : 'gray'}
+            color={completed ? 'green' : '#9CA3AF'}
           />
         </TouchableOpacity>
 
         <Text
           style={[
             styles.text,
-            isSkipped && { textDecorationLine: 'line-through', color: '#999' },
+            skipped && { textDecorationLine: 'line-through', color: '#9CA3AF' },
           ]}
         >
-          {technique.name}
+          {name}
         </Text>
 
         <TouchableOpacity onPress={onToggleSkip}>
           <Icon
             name="cancel"
             size={24}
-            color={isSkipped ? 'red' : 'gray'}
+            color={skipped ? 'red' : '#D1D5DB'}
             style={{ marginLeft: 'auto' }}
           />
         </TouchableOpacity>
@@ -40,17 +45,22 @@ const TechniqueItem = ({ technique, onToggleComplete, onToggleSkip }) => {
 };
 
 const styles = StyleSheet.create({
-  item: {
-    padding: 15,
-    borderRadius: 8,
-    backgroundColor: '#eee',
-    marginBottom: 10,
+  card: {
+    backgroundColor: '#ffffff',
+    padding: 16,
+    borderRadius: 14,
+    marginBottom: 14,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 5,
   },
-  completed: {
-    backgroundColor: '#c8f7c5',
+  completedCard: {
+    backgroundColor: '#D1FAE5',
   },
-  skipped: {
-    backgroundColor: '#f7c5c5',
+  skippedCard: {
+    backgroundColor: '#FECACA',
   },
   row: {
     flexDirection: 'row',
@@ -58,8 +68,9 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    marginLeft: 10,
+    marginLeft: 12,
     flex: 1,
+    color: '#111827',
   },
 });
 

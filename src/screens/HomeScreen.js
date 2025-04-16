@@ -89,23 +89,30 @@ const HomeScreen = () => {
       </TouchableOpacity>
 
       <Modal
-        isVisible={isModalVisible}
-        onBackdropPress={() => setModalVisible(false)}
-        style={styles.modal}
-      >
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Select skill level</Text>
-          {skillLevels.map((level, idx) => (
-            <TouchableOpacity
-              key={idx}
-              style={styles.skillButton}
-              onPress={() => handleSkillSelect(level)}
-            >
-              <Text style={styles.skillText}>{level}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </Modal>
+  isVisible={isModalVisible}
+  onBackdropPress={() => setModalVisible(false)}
+  style={styles.modal}
+>
+  <View style={styles.modalContent}>
+    <Text style={styles.modalTitle}>Pick your skill level</Text>
+
+    <View style={styles.skillGrid}>
+      {skillLevels.map((level, idx) => (
+        <TouchableOpacity
+          key={idx}
+          style={[
+            styles.skillTile,
+            selectedSkill === level && styles.selectedSkillTile,
+          ]}
+          onPress={() => handleSkillSelect(level)}
+        >
+          <Text style={styles.skillLabel}>{level}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  </View>
+</Modal>
+
     </View>
   );
 };
@@ -171,29 +178,64 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     margin: 0,
   },
+  
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     padding: 24,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    borderColor: '#E5E7EB',
+    borderWidth: 1,
   },
+  
   modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
     marginBottom: 16,
+    color: '#111827',
     textAlign: 'center',
   },
-  skillButton: {
+
+
+  skillGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+
+  skillTile: {
+    width: '30%',
     backgroundColor: '#F3F4F6',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 10,
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  skillText: {
-    fontSize: 16,
+  
+  selectedSkillTile: {
+    backgroundColor: '#E0E7FF',
+    borderColor: '#6366F1',
+    borderWidth: 2,
+  },
+
+  skillLabel: {
+    fontSize: 14,
     color: '#111827',
+    fontWeight: '500',
   },
+
+  // skillButton: {
+  //   backgroundColor: '#F3F4F6',
+  //   padding: 14,
+  //   borderRadius: 12,
+  //   marginBottom: 10,
+  //   alignItems: 'center',
+  // },
+  // skillText: {
+  //   fontSize: 16,
+  //   color: '#111827',
+  // },
   selectedInfo: {
     marginTop: 10,
     marginBottom: 20,

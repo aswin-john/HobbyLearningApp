@@ -1,49 +1,75 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList } from 'react-native';
-import styles from '../styles/globalStyles';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { plans } from '../data/plans';
 import TechniqueItem from '../components/TechniqueItem';
 
 const PlanScreen = ({ route }) => {
   const { hobby, level } = route.params;
 
-  const initialTechniques = plans[hobby]?.[level]?.map(name => ({
-    name,
-    completed: false,
-    skipped: false,
-  })) || [];
+  const initialTechniques =
+    plans[hobby]?.[level]?.map((name) => ({
+      name,
+      completed: false,
+      skipped: false,
+    })) || [];
 
   const [techniqueList, setTechniqueList] = useState(initialTechniques);
 
   const toggleCompleted = (index) => {
-    const updatedList = [...techniqueList];
-    updatedList[index].completed = !updatedList[index].completed;
-    setTechniqueList(updatedList);
+    const updated = [...techniqueList];
+    updated[index].completed = !updated[index].completed;
+    setTechniqueList(updated);
   };
 
   const toggleSkipped = (index) => {
-    const updatedList = [...techniqueList];
-    updatedList[index].skipped = !updatedList[index].skipped;
-    setTechniqueList(updatedList);
+    const updated = [...techniqueList];
+    updated[index].skipped = !updated[index].skipped;
+    setTechniqueList(updated);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{`${hobby} - ${level}`}</Text>
+      <Text style={styles.title}>{hobby}</Text>
+      <Text style={styles.subTitle}>{level} Learning Plan</Text>
+
       <FlatList
         data={techniqueList}
         keyExtractor={(item) => item.name}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item, index }) => (
           <TechniqueItem
-  technique={item}
-  onToggleComplete={() => toggleCompleted(index)}
-  onToggleSkip={() => toggleSkipped(index)}
-/>
-
+            technique={item}
+            onToggleComplete={() => toggleCompleted(index)}
+            onToggleSkip={() => toggleSkipped(index)}
+          />
         )}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+    paddingTop: 30,
+    paddingHorizontal: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#111827',
+    textAlign: 'left',
+  },
+  subTitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 20,
+    textAlign: 'left',
+  },
+  listContent: {
+    paddingBottom: 40,
+  },
+});
 
 export default PlanScreen;
