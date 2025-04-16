@@ -18,19 +18,26 @@ const PlanScreen = ({ route }) => {
   const toggleCompleted = (index) => {
     const updated = [...techniqueList];
     updated[index].completed = !updated[index].completed;
+    if (updated[index].completed) updated[index].skipped = false;
     setTechniqueList(updated);
   };
 
   const toggleSkipped = (index) => {
     const updated = [...techniqueList];
     updated[index].skipped = !updated[index].skipped;
+    if (updated[index].skipped) updated[index].completed = false;
     setTechniqueList(updated);
   };
 
+  const completedCount = techniqueList.filter((t) => t.completed).length;
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{hobby}</Text>
-      <Text style={styles.subTitle}>{level} Learning Plan</Text>
+      <Text style={styles.header}>{hobby} 🎯</Text>
+      <Text style={styles.subTitle}>{level} Plan</Text>
+      <Text style={styles.progressText}>
+        ✅ {completedCount} of {techniqueList.length} techniques completed
+      </Text>
 
       <FlatList
         data={techniqueList}
@@ -55,20 +62,26 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     paddingHorizontal: 24,
   },
-  title: {
+  header: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '800',
+    color: '#1F2937',
     textAlign: 'left',
   },
   subTitle: {
     fontSize: 16,
     color: '#6B7280',
-    marginBottom: 20,
-    textAlign: 'left',
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#10B981',
+    marginBottom: 24,
+    fontWeight: '600',
   },
   listContent: {
-    paddingBottom: 40,
+    paddingBottom: 60,
   },
 });
 

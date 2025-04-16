@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const TechniqueItem = ({ technique, onToggleComplete, onToggleSkip }) => {
   const { name, completed, skipped } = technique;
 
   return (
-    <View
+    <Animated.View
       style={[
         styles.card,
         completed && styles.completedCard,
@@ -18,7 +18,7 @@ const TechniqueItem = ({ technique, onToggleComplete, onToggleSkip }) => {
           <Icon
             name={completed ? 'check-box' : 'check-box-outline-blank'}
             size={24}
-            color={completed ? 'green' : '#9CA3AF'}
+            color={completed ? '#10B981' : '#9CA3AF'}
           />
         </TouchableOpacity>
 
@@ -35,12 +35,12 @@ const TechniqueItem = ({ technique, onToggleComplete, onToggleSkip }) => {
           <Icon
             name="cancel"
             size={24}
-            color={skipped ? 'red' : '#D1D5DB'}
+            color={skipped ? '#EF4444' : '#D1D5DB'}
             style={{ marginLeft: 'auto' }}
           />
         </TouchableOpacity>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -48,13 +48,14 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 14,
+    borderRadius: 16,
     marginBottom: 14,
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
     shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    transition: 'all 0.3s',
   },
   completedCard: {
     backgroundColor: '#D1FAE5',
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 12,
     flex: 1,
-    color: '#111827',
+    color: '#1F2937',
   },
 });
 
