@@ -36,6 +36,7 @@ const HomeScreen = () => {
     if (selectedHobby && selectedSkill) {
       navigation.navigate('Plan', {
         hobby: selectedHobby.name,
+        icon: selectedHobby.icon, 
         level: selectedSkill,
       });
     }
