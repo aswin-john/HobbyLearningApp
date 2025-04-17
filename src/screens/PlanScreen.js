@@ -1,5 +1,5 @@
 // PlanScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,20 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  Modal,
 } from 'react-native';
 import { plans } from '../data/plans';
 import TechniqueItem from '../components/TechniqueItem';
 
 const { width } = Dimensions.get('window');
+
+const motivationalQuotes = [
+  "🚀 Keep going, you're doing great!",
+  "🔥 Nice! Another step closer.",
+  "💡 You're learning like a pro!",
+  "⚡ On fire! Keep it up.",
+  "🏆 Crushing it one step at a time!",
+];
 
 const PlanScreen = ({ route }) => {
   const { hobby, level, icon } = route.params;
@@ -24,12 +33,18 @@ const PlanScreen = ({ route }) => {
     })) || [];
 
   const [techniqueList, setTechniqueList] = useState(initialTechniques);
+  const [quote, setQuote] = useState(motivationalQuotes[0]);
+  const [showPopup, setShowPopup] = useState(false);
+  const animation = useRef(new Animated.Value(0)).current;
 
   const toggleCompleted = (index) => {
     const updated = [...techniqueList];
     updated[index].completed = !updated[index].completed;
     if (updated[index].completed) updated[index].skipped = false;
     setTechniqueList(updated);
+
+    const newQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+    setQuote(newQuote);
   };
 
   const toggleSkipped = (index) => {
@@ -41,6 +56,26 @@ const PlanScreen = ({ route }) => {
 
   const completedCount = techniqueList.filter((t) => t.completed).length;
   const total = techniqueList.length;
+  const allCompleted = completedCount === total && total > 0;
+
+  useEffect(() => {
+    if (allCompleted) {
+      setShowPopup(true);
+      Animated.sequence([
+        Animated.timing(animation, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animation, {
+          toValue: 0,
+          duration: 500,
+          delay: 1500,
+          useNativeDriver: true,
+        }),
+      ]).start(() => setShowPopup(false));
+    }
+  }, [allCompleted]);
 
   return (
     <View style={styles.container}>
@@ -55,7 +90,7 @@ const PlanScreen = ({ route }) => {
       <View style={styles.progressPill}>
         <View style={[styles.progressBar, { width: `${(completedCount / total) * 100}%` }]} />
         <Text style={styles.progressText}>
-          ✅ {completedCount} of {total} completed
+          {completedCount} of {total} completed
         </Text>
       </View>
 
@@ -73,11 +108,22 @@ const PlanScreen = ({ route }) => {
         )}
       />
 
-      {completedCount === total && total > 0 && (
-        <Text style={{ textAlign: 'center', fontSize: 18, marginTop: 16 }}>
-          🎉 All done! You're crushing it!
-        </Text>
+      {completedCount > 0 && !allCompleted && total > 0 && (
+        <Text style={styles.quoteText}>{quote}</Text>
       )}
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={showPopup}
+        onRequestClose={() => setShowPopup(false)}
+      >
+        <View style={styles.popupOverlay}>
+          <View style={styles.popupContainer}>
+            <Text style={styles.popupText}>🎉 All done! You're crushing it!</Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -115,7 +161,7 @@ const styles = StyleSheet.create({
   progressPill: {
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#E8EAF6',
     justifyContent: 'center',
     marginBottom: 20,
     overflow: 'hidden',
@@ -125,7 +171,6 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    // backgroundColor: '#10B981',
     backgroundColor: '#14B8A6',
     borderRadius: 16,
     zIndex: 1,
@@ -135,7 +180,8 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     fontSize: 13,
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: '700',
+    fontFamily: 'System',
   },
   listContainer: {
     paddingBottom: 40,
@@ -143,6 +189,36 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 28,
     marginRight: 8,
+  },
+  quoteText: {
+    fontSize: 15,
+    color: '#0F766E',
+    textAlign: 'center',
+    marginTop: 16,
+    fontWeight: '600',
+    fontStyle: 'italic',
+  },
+  popupOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  popupContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    alignItems: 'center',
+  },
+  popupText: {
+    fontSize: 18,
+    color: '#10B981',
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });
 
