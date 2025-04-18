@@ -27,12 +27,15 @@ const motivationalQuotes = [
 const PlanScreen = ({ route }) => {
   const { hobby, level, icon } = route.params;
 
-  const initialTechniques =
-    plans[hobby]?.[level]?.map((name) => ({
+  const initialTechniques = Object.entries(plans[hobby]?.[level] || {}).map(
+    ([name, desc]) => ({
       name,
+      shortDesc: desc.split('. ').slice(0, 2).join('. ') + '.',
+      fullDesc: desc,
       completed: false,
       skipped: false,
-    })) || [];
+    })
+  );
 
   const [techniqueList, setTechniqueList] = useState(initialTechniques);
   const [quote, setQuote] = useState(motivationalQuotes[0]);
