@@ -9,10 +9,12 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
+import ConfettiCannon from 'react-native-confetti-cannon';
+// import { Audio } from 'expo-av';
 import { plans } from '../data/plans';
 import TechniqueItem from '../components/TechniqueItem';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const motivationalQuotes = [
   "🚀 Keep going, you're doing great!",
@@ -35,6 +37,7 @@ const PlanScreen = ({ route }) => {
   const [techniqueList, setTechniqueList] = useState(initialTechniques);
   const [quote, setQuote] = useState(motivationalQuotes[0]);
   const [showPopup, setShowPopup] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
 
   const toggleCompleted = (index) => {
@@ -58,9 +61,22 @@ const PlanScreen = ({ route }) => {
   const total = techniqueList.length;
   const allCompleted = completedCount === total && total > 0;
 
+  // const playSound = async () => {
+  //   try {
+  //     const { sound } = await Audio.Sound.createAsync(
+  //       require('../assets/success.mp3')
+  //     );
+  //     await sound.playAsync();
+  //   } catch (error) {
+  //     console.error('Error playing sound', error);
+  //   }
+  // };
+
   useEffect(() => {
     if (allCompleted) {
       setShowPopup(true);
+      setShowConfetti(true);
+      // playSound();
       Animated.sequence([
         Animated.timing(animation, {
           toValue: 1,
@@ -124,6 +140,19 @@ const PlanScreen = ({ route }) => {
           </View>
         </View>
       </Modal>
+
+      {showConfetti && (
+        <ConfettiCannon
+          count={100}
+          origin={{ x: width / 2, y: height }}
+          fadeOut={true}
+          colors={["#F472B6", "#34D399", "#60A5FA", "#FBBF24"]}
+          explosionSpeed={250}
+          fallSpeed={4500}
+          autoStart={true}
+          onAnimationEnd={() => setShowConfetti(false)}
+        />
+      )}
     </View>
   );
 };
