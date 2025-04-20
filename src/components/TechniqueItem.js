@@ -68,7 +68,7 @@ const TechniqueItem = ({ technique, onToggleComplete, onToggleSkip, index }) => 
         </View>
         {expanded && (
           <View style={styles.accordionContent}>
-            <Text style={styles.description}>{shortDesc}</Text>
+            <Text style={[styles.description,skipped && { textDecorationLine: 'line-through', color: '#9CA3AF' }]}>{shortDesc}</Text>
             <TouchableOpacity
               style={styles.seeMoreBtn}
               onPress={() => navigation.navigate('TechniqueDetails', { name, fullDesc })}
@@ -113,10 +113,13 @@ const styles = StyleSheet.create({
   accordionContent: {
     marginTop: 12,
   },
-  description: {
-    fontSize: 14,
-    color: '#4B5563',
-  },
+ description: {
+  fontSize: 14,
+  color: '#4B5563',
+  lineHeight: 20,  // add this for better readability
+  marginTop: 4,    // optional: adds spacing between title and description
+},
+
   seeMoreBtn: {
     marginTop: 8,
   },
