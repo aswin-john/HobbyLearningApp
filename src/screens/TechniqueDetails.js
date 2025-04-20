@@ -1,6 +1,7 @@
 // TechniqueDetails.js
 import React, { useState, useRef } from 'react';
 import {
+  ScrollView,
   View,
   Text,
   StyleSheet,
@@ -51,19 +52,21 @@ const TechniqueDetails = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{name}</Text>
-      <Text style={styles.description}>{fullDesc}</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>{name}</Text>
+        <Text style={styles.description}>{fullDesc}</Text>
 
-      <View style={styles.sliderWrapper}>
-        <View style={styles.sliderTrack}>
-          <Animated.View style={[styles.sliderFill, { width: interpolatedWidth }]} />
-          <Animated.View
-            {...panResponder.panHandlers}
-            style={[styles.dragHandle, { left: Animated.subtract(interpolatedWidth, 20) }]}
-          />
+        <View style={styles.sliderWrapper}>
+          <View style={styles.sliderTrack}>
+            <Animated.View style={[styles.sliderFill, { width: interpolatedWidth }]} />
+            <Animated.View
+              {...panResponder.panHandlers}
+              style={[styles.dragHandle, { left: Animated.subtract(interpolatedWidth, 20) }]}
+            />
+          </View>
+          <Text style={styles.progressText}>{progress}% Complete</Text>
         </View>
-        <Text style={styles.progressText}>{progress}% Complete</Text>
-      </View>
+      </ScrollView>
 
       {showConfetti && (
         <ConfettiCannon
@@ -84,7 +87,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+  },
+  scrollContainer: {
     padding: 24,
+    paddingBottom: 60,
   },
   title: {
     fontSize: 24,
