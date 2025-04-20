@@ -10,7 +10,6 @@ import {
   Modal,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
-// import { Audio } from 'expo-av';
 import { plans } from '../data/plans';
 import TechniqueItem from '../components/TechniqueItem';
 
@@ -41,6 +40,7 @@ const PlanScreen = ({ route }) => {
   const [quote, setQuote] = useState(motivationalQuotes[0]);
   const [showPopup, setShowPopup] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState(null);
   const animation = useRef(new Animated.Value(0)).current;
 
   const toggleCompleted = (index) => {
@@ -64,22 +64,10 @@ const PlanScreen = ({ route }) => {
   const total = techniqueList.length;
   const allCompleted = completedCount === total && total > 0;
 
-  // const playSound = async () => {
-  //   try {
-  //     const { sound } = await Audio.Sound.createAsync(
-  //       require('../assets/success.mp3')
-  //     );
-  //     await sound.playAsync();
-  //   } catch (error) {
-  //     console.error('Error playing sound', error);
-  //   }
-  // };
-
   useEffect(() => {
     if (allCompleted) {
       setShowPopup(true);
       setShowConfetti(true);
-      // playSound();
       Animated.sequence([
         Animated.timing(animation, {
           toValue: 1,
@@ -123,6 +111,10 @@ const PlanScreen = ({ route }) => {
             onToggleComplete={() => toggleCompleted(index)}
             onToggleSkip={() => toggleSkipped(index)}
             index={index}
+            isExpanded={expandedIndex === index}
+            onToggleExpand={() =>
+              setExpandedIndex((prev) => (prev === index ? null : index))
+            }
           />
         )}
       />
