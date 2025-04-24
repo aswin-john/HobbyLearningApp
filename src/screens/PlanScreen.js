@@ -82,7 +82,7 @@ const PlanScreen = ({ route }) => {
       setQuote(motivationalQuotes[0]);
       setShowPopup(false);
       setShowConfetti(false);
-      console.log("Progress has been reset!");
+      // console.log("Progress has been reset!");
     } catch (e) {
       console.error("Failed to reset progress", e);
     }
@@ -96,7 +96,7 @@ const PlanScreen = ({ route }) => {
       setShowPopup(false);
       setShowConfetti(false);
       setQuote(motivationalQuotes[0]);
-      console.log("Progress has been reset!");
+      // console.log("Progress has been reset!");
     } catch (e) {
       console.error('Failed to reset progress.', e);
     }
