@@ -8,6 +8,7 @@ import {
   Animated,
   Dimensions,
   Modal,
+  TouchableOpacity
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ConfettiCannon from 'react-native-confetti-cannon';
@@ -72,6 +73,21 @@ const PlanScreen = ({ route }) => {
     };
     saveProgress();
   }, [techniqueList]);
+
+  const handleResetProgress = async () => {
+    try {
+      await AsyncStorage.removeItem(storageKey);
+      setTechniqueList(initialTechniques);
+      setExpandedIndex(null);
+      setQuote(motivationalQuotes[0]);
+      setShowPopup(false);
+      setShowConfetti(false);
+      console.log("Progress has been reset!");
+    } catch (e) {
+      console.error("Failed to reset progress", e);
+    }
+  };
+  
 
   const toggleCompleted = (index) => {
     const updated = [...techniqueList];
@@ -152,6 +168,11 @@ const PlanScreen = ({ route }) => {
       {completedCount > 0 && !allCompleted && total > 0 && (
         <Text style={styles.quoteText}>{quote}</Text>
       )}
+
+<TouchableOpacity style={styles.resetButton} onPress={handleResetProgress}>
+  <Text style={styles.resetButtonText}>Reset Progress</Text>
+</TouchableOpacity>
+
 
       <Modal
         transparent
@@ -274,6 +295,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
+
+  resetButton: {
+    marginTop: 20,
+    backgroundColor: '#0F766E',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    
+    alignSelf: 'center',
+    marginBottom: 10,
+    width: '50%',
+  },
+  resetButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  
+
+
 });
 
 export default PlanScreen;
