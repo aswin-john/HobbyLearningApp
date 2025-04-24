@@ -87,6 +87,21 @@ const PlanScreen = ({ route }) => {
       console.error("Failed to reset progress", e);
     }
   };
+
+  const resetProgress = async () => {
+    try {
+      await AsyncStorage.removeItem(storageKey);
+      setTechniqueList(initialTechniques);
+      setExpandedIndex(null);
+      setShowPopup(false);
+      setShowConfetti(false);
+      setQuote(motivationalQuotes[0]);
+      console.log("Progress has been reset!");
+    } catch (e) {
+      console.error('Failed to reset progress.', e);
+    }
+  };
+  
   
 
   const toggleCompleted = (index) => {
@@ -130,6 +145,9 @@ const PlanScreen = ({ route }) => {
     }
   }, [allCompleted]);
 
+  const hasProgress = techniqueList.some(t => t.completed || t.skipped);
+
+
   return (
     <View style={styles.container}>
       <View style={styles.headerSection}>
@@ -169,9 +187,16 @@ const PlanScreen = ({ route }) => {
         <Text style={styles.quoteText}>{quote}</Text>
       )}
 
-<TouchableOpacity style={styles.resetButton} onPress={handleResetProgress}>
-  <Text style={styles.resetButtonText}>Reset Progress</Text>
-</TouchableOpacity>
+{hasProgress && (
+  <TouchableOpacity
+    style={styles.resetButton}
+    onPress={resetProgress}
+  >
+    <Text style={styles.resetButtonText}>Reset Progress</Text>
+  </TouchableOpacity>
+)}
+
+
 
 
       <Modal
