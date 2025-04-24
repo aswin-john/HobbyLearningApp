@@ -9,6 +9,7 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { plans } from '../data/plans';
 import TechniqueItem from '../components/TechniqueItem';
@@ -26,6 +27,8 @@ const motivationalQuotes = [
 const PlanScreen = ({ route }) => {
   const { hobby, level, icon } = route.params;
 
+  const storageKey = `@progress_${hobby}_${level}`;
+
   const initialTechniques = Object.entries(plans[hobby]?.[level] || {}).map(
     ([name, desc]) => ({
       name,
@@ -42,6 +45,33 @@ const PlanScreen = ({ route }) => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const animation = useRef(new Animated.Value(0)).current;
+
+  // 🔹 Load saved progress on mount
+  useEffect(() => {
+    const loadProgress = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem(storageKey);
+        if (savedData) {
+          setTechniqueList(JSON.parse(savedData));
+        }
+      } catch (e) {
+        console.error("Failed to load progress", e);
+      }
+    };
+    loadProgress();
+  }, []);
+
+  // 🔹 Save progress whenever techniqueList updates
+  useEffect(() => {
+    const saveProgress = async () => {
+      try {
+        await AsyncStorage.setItem(storageKey, JSON.stringify(techniqueList));
+      } catch (e) {
+        console.error("Failed to save progress", e);
+      }
+    };
+    saveProgress();
+  }, [techniqueList]);
 
   const toggleCompleted = (index) => {
     const updated = [...techniqueList];
