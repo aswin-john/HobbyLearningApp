@@ -74,19 +74,19 @@ const PlanScreen = ({ route }) => {
     saveProgress();
   }, [techniqueList]);
 
-  const handleResetProgress = async () => {
-    try {
-      await AsyncStorage.removeItem(storageKey);
-      setTechniqueList(initialTechniques);
-      setExpandedIndex(null);
-      setQuote(motivationalQuotes[0]);
-      setShowPopup(false);
-      setShowConfetti(false);
-      // console.log("Progress has been reset!");
-    } catch (e) {
-      console.error("Failed to reset progress", e);
-    }
-  };
+  // const handleResetProgress = async () => {
+  //   try {
+  //     await AsyncStorage.removeItem(storageKey);
+  //     setTechniqueList(initialTechniques);
+  //     setExpandedIndex(null);
+  //     setQuote(motivationalQuotes[0]);
+  //     setShowPopup(false);
+  //     setShowConfetti(false);
+  //     // console.log("Progress has been reset!");
+  //   } catch (e) {
+  //     console.error("Failed to reset progress", e);
+  //   }
+  // };
 
   const resetProgress = async () => {
     try {
