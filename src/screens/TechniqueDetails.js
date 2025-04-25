@@ -1,5 +1,4 @@
-// TechniqueDetails.js
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ScrollView,
   View,
@@ -8,19 +7,51 @@ import {
   Dimensions,
   PanResponder,
   Animated,
-  Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute } from '@react-navigation/native';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const TechniqueDetails = () => {
   const route = useRoute();
   const { name, fullDesc } = route.params;
-  const [progress, setProgress] = useState(0);
-  const [showPopup, setShowPopup] = useState(false);
+
   const sliderWidth = width - 80;
   const handlePosition = useRef(new Animated.Value(0)).current;
+
+  const [progress, setProgress] = useState(0);
+  const storageKey = `@technique_progress_${name}`;
+
+  // 🔹 Load saved progress on mount
+  useEffect(() => {
+    const loadProgress = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(storageKey);
+        if (saved !== null) {
+          const savedProgress = parseInt(saved, 10);
+          setProgress(savedProgress);
+          const position = (savedProgress / 100) * sliderWidth;
+          handlePosition.setValue(position);
+        }
+      } catch (e) {
+        console.error("Failed to load technique progress", e);
+      }
+    };
+    loadProgress();
+  }, []);
+
+  // 🔹 Save progress whenever it changes
+  useEffect(() => {
+    const saveProgress = async () => {
+      try {
+        await AsyncStorage.setItem(storageKey, progress.toString());
+      } catch (e) {
+        console.error("Failed to save technique progress", e);
+      }
+    };
+    saveProgress();
+  }, [progress]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -31,15 +62,8 @@ const TechniqueDetails = () => {
         const percentage = Math.round((newX / sliderWidth) * 100);
         setProgress(percentage);
       },
-      onPanResponderRelease: async () => {
+      onPanResponderRelease: () => {
         handlePosition.flattenOffset();
-        const currentValue = handlePosition.__getValue();
-        const finalProgress = Math.round((currentValue / sliderWidth) * 100);
-        if (finalProgress >= 99 && !showPopup) {
-          setProgress(finalProgress);
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 3000);
-        }
       },
     })
   ).current;
@@ -67,45 +91,32 @@ const TechniqueDetails = () => {
           <Text style={styles.progressText}>{progress}% Complete</Text>
         </View>
       </ScrollView>
-
-      <Modal
-        transparent
-        animationType="fade"
-        visible={showPopup}
-        onRequestClose={() => setShowPopup(false)}
-      >
-        <View style={styles.popupOverlay}>
-          <View style={styles.popupContainer}>
-            <Text style={styles.popupText}>✅ You have completed {name}.</Text>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
+  container: { 
+    flex: 1, 
+    backgroundColor: '#F9FAFB' 
   },
-  scrollContainer: {
-    padding: 24,
-    paddingBottom: 60,
+  scrollContainer: { 
+    padding: 24, 
+    paddingBottom: 60 
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 12,
+  title: { 
+    fontSize: 24, 
+    fontWeight: '700', 
+    color: '#111827', 
+    marginBottom: 12 
   },
-  description: {
-    fontSize: 16,
-    color: '#4B5563',
-    marginBottom: 30,
+  description: { 
+    fontSize: 16, 
+    color: '#4B5563', 
+    marginBottom: 30 
   },
-  sliderWrapper: {
-    alignItems: 'center',
+  sliderWrapper: { 
+    alignItems: 'center' 
   },
   sliderTrack: {
     height: 20,
@@ -132,35 +143,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#10B981',
     elevation: 5,
   },
-  progressText: {
-    marginTop: 16,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  popupOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    
-  },
-  popupContainer: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    alignItems: 'center',
-    marginHorizontal: 20,
-  },
-  popupText: {
-    fontSize: 18,
-    color: '#10B981',
-    fontWeight: '700',
-    textAlign: 'center',
+  progressText: { 
+    marginTop: 16, 
+    fontSize: 14, 
+    fontWeight: '600', 
+    color: '#1F2937' 
   },
 });
 
