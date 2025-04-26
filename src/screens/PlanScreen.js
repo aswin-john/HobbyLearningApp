@@ -181,6 +181,7 @@ const PlanScreen = ({ route }) => {
             }
           />
         )}
+        initialNumToRender={6} 
       />
 
       {completedCount > 0 && !allCompleted && total > 0 && (

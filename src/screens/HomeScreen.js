@@ -67,6 +67,7 @@ const HomeScreen = () => {
         renderItem={renderHobbyItem}
         columnWrapperStyle={styles.grid}
         contentContainerStyle={styles.gridContainer}
+        initialNumToRender={6}
       />
 
 
