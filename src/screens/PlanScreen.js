@@ -65,7 +65,7 @@ const PlanScreen = ({ route }) => {
     loadProgress();
   }, []);
 
-  // 🔹 Debounced Save Progress
+  //  Debounced Save Progress
   const debouncedSaveProgress = useCallback((data) => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
