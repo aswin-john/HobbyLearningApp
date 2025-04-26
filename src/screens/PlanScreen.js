@@ -71,7 +71,7 @@ const PlanScreen = ({ route }) => {
       clearTimeout(debounceTimer.current);
     }
     debounceTimer.current = setTimeout(async () => {
-      console.log('Saving to AsyncStorage...', new Date().toLocaleTimeString());
+      // console.log('Saving to AsyncStorage...', new Date().toLocaleTimeString());
       try {
         await AsyncStorage.setItem(storageKey, JSON.stringify(data));
       } catch (e) {
