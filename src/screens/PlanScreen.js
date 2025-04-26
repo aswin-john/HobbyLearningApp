@@ -125,7 +125,8 @@ const PlanScreen = ({ route }) => {
     if (allCompleted) {
       setShowPopup(true);
       setShowConfetti(true);
-      Animated.sequence([
+  
+      const animationSequence = Animated.sequence([
         Animated.timing(animation, {
           toValue: 1,
           duration: 500,
@@ -137,9 +138,19 @@ const PlanScreen = ({ route }) => {
           delay: 1500,
           useNativeDriver: true,
         }),
-      ]).start(() => setShowPopup(false));
+      ]);
+  
+      animationSequence.start(() => setShowPopup(false));
+  
+      // 🧹 Cleanup: Stop animation if component unmounts
+      return () => {
+        // console.log("🛑 Animation stopped due to unmount or re-run.");
+        animation.stopAnimation();
+      };
+      
     }
   }, [allCompleted]);
+  
 
   const hasProgress = techniqueList.some(t => t.completed || t.skipped);
 
