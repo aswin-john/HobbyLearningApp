@@ -165,4 +165,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TechniqueItem;
+export default React.memo(TechniqueItem);
