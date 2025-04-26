@@ -1,5 +1,5 @@
 // PlanScreen.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useCallback } from 'react';
 import {
   View,
   Text,
@@ -47,6 +47,9 @@ const PlanScreen = ({ route }) => {
   const [expandedIndex, setExpandedIndex] = useState(null);
   const animation = useRef(new Animated.Value(0)).current;
 
+  // Debounce timer ref
+  const debounceTimer = useRef(null);
+
   // 🔹 Load saved progress on mount
   useEffect(() => {
     const loadProgress = async () => {
@@ -62,31 +65,24 @@ const PlanScreen = ({ route }) => {
     loadProgress();
   }, []);
 
-  // 🔹 Save progress whenever techniqueList updates
-  useEffect(() => {
-    const saveProgress = async () => {
+  // 🔹 Debounced Save Progress
+  const debouncedSaveProgress = useCallback((data) => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    debounceTimer.current = setTimeout(async () => {
+      console.log('Saving to AsyncStorage...', new Date().toLocaleTimeString());
       try {
-        await AsyncStorage.setItem(storageKey, JSON.stringify(techniqueList));
+        await AsyncStorage.setItem(storageKey, JSON.stringify(data));
       } catch (e) {
         console.error("Failed to save progress", e);
       }
-    };
-    saveProgress();
-  }, [techniqueList]);
+    }, 500);  // 500ms debounce delay
+  }, []);
 
-  // const handleResetProgress = async () => {
-  //   try {
-  //     await AsyncStorage.removeItem(storageKey);
-  //     setTechniqueList(initialTechniques);
-  //     setExpandedIndex(null);
-  //     setQuote(motivationalQuotes[0]);
-  //     setShowPopup(false);
-  //     setShowConfetti(false);
-  //     // console.log("Progress has been reset!");
-  //   } catch (e) {
-  //     console.error("Failed to reset progress", e);
-  //   }
-  // };
+  useEffect(() => {
+    debouncedSaveProgress(techniqueList);
+  }, [techniqueList]);
 
   const resetProgress = async () => {
     try {

@@ -23,7 +23,10 @@ const TechniqueDetails = () => {
   const [progress, setProgress] = useState(0);
   const storageKey = `@technique_progress_${name}`;
 
-  // 🔹 Load saved progress on mount
+
+  const saveTimeout = useRef(null);  //  For debouncing
+
+ // Load saved progress
   useEffect(() => {
     const loadProgress = async () => {
       try {
@@ -41,17 +44,29 @@ const TechniqueDetails = () => {
     loadProgress();
   }, []);
 
-  // 🔹 Save progress whenever it changes
   useEffect(() => {
-    const saveProgress = async () => {
+    // console.log('🔄 Progress changed:', progress);
+  
+    if (saveTimeout.current) {
+      // console.log('⏱️ Clearing previous timeout...');
+      clearTimeout(saveTimeout.current);
+    }
+  
+    saveTimeout.current = setTimeout(async () => {
       try {
+        // console.log('💾 Saving progress to AsyncStorage:', progress);
         await AsyncStorage.setItem(storageKey, progress.toString());
       } catch (e) {
-        console.error("Failed to save technique progress", e);
+        console.error(" Failed to save technique progress", e);
       }
+    }, 500);
+  
+    return () => {
+      // console.log(' Cleanup timeout on unmount or progress change');
+      clearTimeout(saveTimeout.current);
     };
-    saveProgress();
   }, [progress]);
+  
 
   const panResponder = useRef(
     PanResponder.create({
