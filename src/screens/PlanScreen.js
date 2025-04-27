@@ -10,6 +10,8 @@ import {
   Modal,
   TouchableOpacity
 } from 'react-native';
+import { useDebouncedAsyncStorage } from '../hooks/useDebouncedAsyncStorage';
+import { MOTIVATIONAL_QUOTES } from '../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { plans } from '../data/plans';
@@ -17,17 +19,10 @@ import TechniqueItem from '../components/TechniqueItem';
 
 const { width, height } = Dimensions.get('window');
 
-const motivationalQuotes = [
-  "🚀 Keep going, you're doing great!",
-  "🔥 Nice! Another step closer.",
-  "💡 You're learning like a pro!",
-  "⚡ On fire! Keep it up.",
-  "🏆 Crushing it one step at a time!",
-];
+
 
 const PlanScreen = ({ route }) => {
   const { hobby, level, icon } = route.params;
-
   const storageKey = `@progress_${hobby}_${level}`;
 
   const initialTechniques = Object.entries(plans[hobby]?.[level] || {}).map(
@@ -41,16 +36,13 @@ const PlanScreen = ({ route }) => {
   );
 
   const [techniqueList, setTechniqueList] = useState(initialTechniques);
-  const [quote, setQuote] = useState(motivationalQuotes[0]);
+  const [quote, setQuote] = useState(MOTIVATIONAL_QUOTES[0]);
   const [showPopup, setShowPopup] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const animation = useRef(new Animated.Value(0)).current;
 
-  // Debounce timer ref
-  const debounceTimer = useRef(null);
-
-  // 🔹 Load saved progress on mount
+  // Load saved progress
   useEffect(() => {
     const loadProgress = async () => {
       try {
@@ -65,24 +57,8 @@ const PlanScreen = ({ route }) => {
     loadProgress();
   }, []);
 
-  //  Debounced Save Progress
-  const debouncedSaveProgress = useCallback((data) => {
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-    debounceTimer.current = setTimeout(async () => {
-      // console.log('Saving to AsyncStorage...', new Date().toLocaleTimeString());
-      try {
-        await AsyncStorage.setItem(storageKey, JSON.stringify(data));
-      } catch (e) {
-        console.error("Failed to save progress", e);
-      }
-    }, 500);  // 500ms debounce delay
-  }, []);
-
-  useEffect(() => {
-    debouncedSaveProgress(techniqueList);
-  }, [techniqueList]);
+  // Use custom hook for debounced saving
+  useDebouncedAsyncStorage(storageKey, techniqueList);
 
   const resetProgress = async () => {
     try {
@@ -91,8 +67,7 @@ const PlanScreen = ({ route }) => {
       setExpandedIndex(null);
       setShowPopup(false);
       setShowConfetti(false);
-      setQuote(motivationalQuotes[0]);
-      // console.log("Progress has been reset!");
+      setQuote(MOTIVATIONAL_QUOTES[0]);
     } catch (e) {
       console.error('Failed to reset progress.', e);
     }
@@ -100,22 +75,22 @@ const PlanScreen = ({ route }) => {
   
   
 
-  const toggleCompleted = (index) => {
+  const toggleCompleted = useCallback((index) => {
     const updated = [...techniqueList];
     updated[index].completed = !updated[index].completed;
     if (updated[index].completed) updated[index].skipped = false;
     setTechniqueList(updated);
 
-    const newQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+    const newQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
     setQuote(newQuote);
-  };
+  }, [techniqueList]);
 
-  const toggleSkipped = (index) => {
+  const toggleSkipped = useCallback((index) => {
     const updated = [...techniqueList];
     updated[index].skipped = !updated[index].skipped;
     if (updated[index].skipped) updated[index].completed = false;
     setTechniqueList(updated);
-  };
+  }, [techniqueList]);
 
   const completedCount = techniqueList.filter((t) => t.completed).length;
   const total = techniqueList.length;
@@ -125,8 +100,8 @@ const PlanScreen = ({ route }) => {
     if (allCompleted) {
       setShowPopup(true);
       setShowConfetti(true);
-  
-      const animationSequence = Animated.sequence([
+
+      const anim = Animated.sequence([
         Animated.timing(animation, {
           toValue: 1,
           duration: 500,
@@ -139,15 +114,10 @@ const PlanScreen = ({ route }) => {
           useNativeDriver: true,
         }),
       ]);
-  
-      animationSequence.start(() => setShowPopup(false));
-  
-      // 🧹 Cleanup: Stop animation if component unmounts
-      return () => {
-        // console.log("🛑 Animation stopped due to unmount or re-run.");
-        animation.stopAnimation();
-      };
-      
+
+      anim.start(() => setShowPopup(false));
+
+      return () => animation.stopAnimation();
     }
   }, [allCompleted]);
   

@@ -10,6 +10,9 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute } from '@react-navigation/native';
+import { useDebouncedAsyncStorage } from '../hooks/useDebouncedAsyncStorage';
+import { HANDLE_OFFSET } from '../constants';
+
 
 const { width } = Dimensions.get('window');
 
@@ -24,9 +27,9 @@ const TechniqueDetails = () => {
   const storageKey = `@technique_progress_${name}`;
 
 
-  const saveTimeout = useRef(null);  //  For debouncing
+  
 
- // Load saved progress
+// Load saved progress on mount
   useEffect(() => {
     const loadProgress = async () => {
       try {
@@ -38,41 +41,21 @@ const TechniqueDetails = () => {
           handlePosition.setValue(position);
         }
       } catch (e) {
-        console.error("Failed to load technique progress", e);
+        console.error("❌ Failed to load technique progress", e);
       }
     };
     loadProgress();
   }, []);
 
-  useEffect(() => {
-    // console.log('🔄 Progress changed:', progress);
+  // Use shared debounced save logic
+  useDebouncedAsyncStorage(storageKey, progress);
   
-    if (saveTimeout.current) {
-      // console.log('⏱️ Clearing previous timeout...');
-      clearTimeout(saveTimeout.current);
-    }
-  
-    saveTimeout.current = setTimeout(async () => {
-      try {
-        // console.log('💾 Saving progress to AsyncStorage:', progress);
-        await AsyncStorage.setItem(storageKey, progress.toString());
-      } catch (e) {
-        console.error(" Failed to save technique progress", e);
-      }
-    }, 500);
-  
-    return () => {
-      // console.log(' Cleanup timeout on unmount or progress change');
-      clearTimeout(saveTimeout.current);
-    };
-  }, [progress]);
-  
-
+// Gesture Handler for Slider
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (_, gestureState) => {
-        let newX = Math.min(Math.max(gestureState.moveX - 40, 0), sliderWidth);
+        let newX = Math.min(Math.max(gestureState.moveX - HANDLE_OFFSET, 0), sliderWidth);
         handlePosition.setValue(newX);
         const percentage = Math.round((newX / sliderWidth) * 100);
         setProgress(percentage);
