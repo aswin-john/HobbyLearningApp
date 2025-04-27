@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   ScrollView,
   View,
@@ -13,7 +13,6 @@ import { useRoute } from '@react-navigation/native';
 import { useDebouncedAsyncStorage } from '../hooks/useDebouncedAsyncStorage';
 import { HANDLE_OFFSET } from '../constants';
 
-
 const { width } = Dimensions.get('window');
 
 const TechniqueDetails = () => {
@@ -26,15 +25,13 @@ const TechniqueDetails = () => {
   const [progress, setProgress] = useState(0);
   const storageKey = `@technique_progress_${name}`;
 
-
-  
-
-// Load saved progress on mount
+  // Load saved progress on mount
   useEffect(() => {
+    let isMounted = true;
     const loadProgress = async () => {
       try {
         const saved = await AsyncStorage.getItem(storageKey);
-        if (saved !== null) {
+        if (saved !== null && isMounted) {
           const savedProgress = parseInt(saved, 10);
           setProgress(savedProgress);
           const position = (savedProgress / 100) * sliderWidth;
@@ -45,21 +42,23 @@ const TechniqueDetails = () => {
       }
     };
     loadProgress();
-  }, []);
+    
+    return () => { isMounted = false; };
+  }, [storageKey, sliderWidth, handlePosition]);
 
   // Use shared debounced save logic
   useDebouncedAsyncStorage(storageKey, progress);
-  
-// Gesture Handler for Slider
+
+  // Memoize the pan responder creation
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gestureState) => {
-        let newX = Math.min(Math.max(gestureState.moveX - HANDLE_OFFSET, 0), sliderWidth);
+      onPanResponderMove: useCallback((_, gestureState) => {
+        const newX = Math.min(Math.max(gestureState.moveX - HANDLE_OFFSET, 0), sliderWidth);
         handlePosition.setValue(newX);
         const percentage = Math.round((newX / sliderWidth) * 100);
         setProgress(percentage);
-      },
+      }, [sliderWidth, handlePosition, setProgress]),
       onPanResponderRelease: () => {
         handlePosition.flattenOffset();
       },
@@ -74,7 +73,11 @@ const TechniqueDetails = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer} 
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+      >
         <Text style={styles.title}>{name}</Text>
         <Text style={styles.description}>{fullDesc}</Text>
 
@@ -149,4 +152,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TechniqueDetails;
+export default React.memo(TechniqueDetails);

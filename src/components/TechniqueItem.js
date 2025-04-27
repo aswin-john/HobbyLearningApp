@@ -1,12 +1,10 @@
-// TechniqueItem.js
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, memo } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Animated,
-  LayoutAnimation,
   Platform,
   UIManager,
 } from 'react-native';
@@ -25,29 +23,35 @@ const TechniqueItem = ({
   isExpanded,
   onToggleExpand,
 }) => {
-  const { name, completed, skipped, shortDesc, fullDesc } = technique;
+  const { name, completed, skipped, shortDesc } = technique;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
   const arrowAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
 
+  // Only run entrance animation once on mount
   useEffect(() => {
-    Animated.parallel([
+    const animation = Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 300,
-        delay: index * 100,
+        delay: index * 50, // Reduced delay for faster rendering
         useNativeDriver: true,
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
         friction: 6,
-        delay: index * 100,
+        delay: index * 50, // Reduced delay
         useNativeDriver: true,
       }),
-    ]).start();
+    ]);
+    
+    animation.start();
+    
+    return () => animation.stop();
   }, []);
 
+  // Handle arrow animation
   useEffect(() => {
     Animated.timing(arrowAnim, {
       toValue: isExpanded ? 1 : 0,
@@ -71,7 +75,10 @@ const TechniqueItem = ({
       ]}
     >
       <View style={styles.row}>
-        <TouchableOpacity onPress={onToggleComplete}>
+        <TouchableOpacity 
+          onPress={onToggleComplete}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Icon
             name={completed ? 'check-circle' : 'radio-button-unchecked'}
             size={22}
@@ -79,9 +86,14 @@ const TechniqueItem = ({
           />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onToggleExpand} style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+        <TouchableOpacity 
+          onPress={onToggleExpand} 
+          style={styles.titleWrapper}
+          activeOpacity={0.7}
+        >
           <Text
-            style={[styles.text, skipped && { textDecorationLine: 'line-through', color: '#9CA3AF' }]}
+            style={[styles.text, skipped && styles.skippedText]}
+            numberOfLines={1}
           >
             {name}
           </Text>
@@ -90,12 +102,14 @@ const TechniqueItem = ({
           </Animated.View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onToggleSkip}>
+        <TouchableOpacity 
+          onPress={onToggleSkip}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Icon
             name="cancel"
             size={20}
             color={skipped ? '#EF4444' : '#D1D5DB'}
-            style={{ marginLeft: 'auto' }}
           />
         </TouchableOpacity>
       </View>
@@ -103,13 +117,16 @@ const TechniqueItem = ({
       {isExpanded && (
         <View style={styles.accordionContent}>
           <Text
-            style={[styles.description, skipped && { textDecorationLine: 'line-through', color: '#9CA3AF' }]}
+            style={[styles.description, skipped && styles.skippedText]}
           >
             {shortDesc}
           </Text>
           <TouchableOpacity
             style={styles.seeMoreBtn}
-            onPress={() => navigation.navigate('TechniqueDetails', { name, fullDesc })}
+            onPress={() => navigation.navigate('TechniqueDetails', { 
+              name, 
+              fullDesc: technique.fullDesc 
+            })}
           >
             <Text style={styles.seeMoreText}>See More</Text>
           </TouchableOpacity>
@@ -141,11 +158,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  titleWrapper: {
+    flex: 1,
+    flexDirection: 'row', 
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
   text: {
     fontSize: 16,
-    marginLeft: 12,
     flex: 1,
     color: '#1F2937',
+  },
+  skippedText: {
+    textDecorationLine: 'line-through',
+    color: '#9CA3AF',
   },
   accordionContent: {
     marginTop: 12,
@@ -158,6 +184,7 @@ const styles = StyleSheet.create({
   },
   seeMoreBtn: {
     marginTop: 8,
+    paddingVertical: 4,
   },
   seeMoreText: {
     color: '#3B82F6',
@@ -165,4 +192,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(TechniqueItem);
+// Using React.memo to prevent unnecessary renders
+export default memo(TechniqueItem);

@@ -1,10 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import { HOBBY_DATA, SKILL_LEVELS, ROUTES } from '../constants';
-
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -12,6 +11,7 @@ const HomeScreen = () => {
   const [selectedSkill, setSelectedSkill] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
 
+  // Memoize handlers to prevent unnecessary re-renders
   const handleHobbySelect = useCallback((item) => {
     setSelectedHobby(item);
     setSelectedSkill(null);
@@ -33,7 +33,8 @@ const HomeScreen = () => {
     }
   }, [selectedHobby, selectedSkill, navigation]);
 
-  const renderHobbyItem = ({ item }) => (
+  // Memoize this function to prevent recreation on every render
+  const renderHobbyItem = useCallback(({ item }) => (
     <TouchableOpacity
       style={[
         styles.tile,
@@ -47,7 +48,10 @@ const HomeScreen = () => {
       <Text style={styles.icon}>{item.icon}</Text>
       <Text style={styles.name}>{item.name}</Text>
     </TouchableOpacity>
-  );
+  ), [selectedHobby, handleHobbySelect]);
+
+  // Pre-compute the disabled state for start button
+  const startButtonDisabled = !(selectedHobby && selectedSkill);
 
   return (
     <View style={styles.container}>
@@ -61,10 +65,11 @@ const HomeScreen = () => {
         columnWrapperStyle={styles.grid}
         contentContainerStyle={styles.gridContainer}
         initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={3}
       />
 
-
-{selectedHobby && selectedSkill && (
+      {selectedHobby && selectedSkill && (
         <View style={styles.selectedInfo}>
           <Text style={styles.selectedText}>
             You chose <Text style={styles.highlight}>{selectedHobby.name}</Text> as your hobby and{' '}
@@ -73,10 +78,9 @@ const HomeScreen = () => {
         </View>
       )}
 
-
-<TouchableOpacity
-        style={[styles.startBtn, !(selectedHobby && selectedSkill) && { opacity: 0.4 }]}
-        disabled={!(selectedHobby && selectedSkill)}
+      <TouchableOpacity
+        style={[styles.startBtn, startButtonDisabled && { opacity: 0.4 }]}
+        disabled={startButtonDisabled}
         onPress={handleStart}
         accessible
         accessibilityLabel="Start planning"
@@ -89,6 +93,11 @@ const HomeScreen = () => {
         isVisible={isModalVisible}
         onBackdropPress={() => setModalVisible(false)}
         style={styles.modal}
+        useNativeDriver={true}
+        animationInTiming={300}
+        animationOutTiming={300}
+        backdropTransitionInTiming={300}
+        backdropTransitionOutTiming={300}
       >
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Pick your skill level</Text>
@@ -111,7 +120,6 @@ const HomeScreen = () => {
           </View>
         </View>
       </Modal>
-
     </View>
   );
 };
