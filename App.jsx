@@ -4,7 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HomeScreen from './src/screens/HomeScreen';
 import PlanScreen from './src/screens/PlanScreen';
-import TechniqueDetails from './src/screens/TechniqueDetails'; // ✅ Make sure this file exists
+import TechniqueDetails from './src/screens/TechniqueDetails';
+import CustomHeader from './src/components/CustomHeader';
 
 const Stack = createNativeStackNavigator();
 
@@ -12,10 +13,9 @@ const App = () => (
   <NavigationContainer>
     <Stack.Navigator
       initialRouteName="Home"
-      // screenOptions={{
-      //   headerShown: false,
-      //   animation: 'slide_from_right',
-      // }}
+      screenOptions={({ route }) => ({
+        header: () => <CustomHeader title={route.name} />,
+      })}
     >
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Plan" component={PlanScreen} />
