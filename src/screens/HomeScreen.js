@@ -1,19 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
+import { HOBBY_DATA, SKILL_LEVELS, ROUTES } from '../constants';
 
-const hobbyData = [
-  { id: '1', name: 'Chess', icon: '♟️', color: '#F3F4F6' },
-  { id: '2', name: 'Guitar', icon: '🎸', color: '#FDE68A' },
-  { id: '3', name: 'Running', icon: '🏃', color: '#E9D5FF' },
-  { id: '4', name: 'Music', icon: '🎵', color: '#E0F2FE' },
-  { id: '5', name: 'Reading', icon: '📚', color: '#FEF9C3' },
-  { id: '6', name: 'Cooking', icon: '🍳', color: '#DCFCE7' },
-];
-
-const skillLevels = ['Beginner', 'Intermediate', 'Advanced'];
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -21,26 +12,26 @@ const HomeScreen = () => {
   const [selectedSkill, setSelectedSkill] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
 
-  const handleHobbySelect = (item) => {
+  const handleHobbySelect = useCallback((item) => {
     setSelectedHobby(item);
-    setSelectedSkill(null); // reset skill
-    setModalVisible(true);  // open skill selector
-  };
+    setSelectedSkill(null);
+    setModalVisible(true);
+  }, []);
 
-  const handleSkillSelect = (skill) => {
+  const handleSkillSelect = useCallback((skill) => {
     setSelectedSkill(skill);
     setModalVisible(false);
-  };
+  }, []);
 
-  const handleStart = () => {
+  const handleStart = useCallback(() => {
     if (selectedHobby && selectedSkill) {
-      navigation.navigate('Plan', {
+      navigation.navigate(ROUTES.PLAN, {
         hobby: selectedHobby.name,
         icon: selectedHobby.icon, 
         level: selectedSkill,
       });
     }
-  };
+  }, [selectedHobby, selectedSkill, navigation]);
 
   const renderHobbyItem = ({ item }) => (
     <TouchableOpacity
@@ -50,6 +41,8 @@ const HomeScreen = () => {
         selectedHobby?.id === item.id && styles.selectedTile,
       ]}
       onPress={() => handleHobbySelect(item)}
+      accessible
+      accessibilityLabel={`Select hobby ${item.name}`}
     >
       <Text style={styles.icon}>{item.icon}</Text>
       <Text style={styles.name}>{item.name}</Text>
@@ -61,7 +54,7 @@ const HomeScreen = () => {
       <Text style={styles.title}>Select hobbies & interests.</Text>
 
       <FlatList
-        data={hobbyData}
+        data={HOBBY_DATA}
         numColumns={3}
         keyExtractor={(item) => item.id}
         renderItem={renderHobbyItem}
@@ -72,48 +65,52 @@ const HomeScreen = () => {
 
 
 {selectedHobby && selectedSkill && (
-  <View style={styles.selectedInfo}>
-    <Text style={styles.selectedText}>
-      You chose <Text style={styles.highlight}>{selectedHobby.name}</Text> as your hobby and{' '}
-      <Text style={styles.highlight}>{selectedSkill}</Text> as your skill level.
-    </Text>
-  </View>
-)}
+        <View style={styles.selectedInfo}>
+          <Text style={styles.selectedText}>
+            You chose <Text style={styles.highlight}>{selectedHobby.name}</Text> as your hobby and{' '}
+            <Text style={styles.highlight}>{selectedSkill}</Text> as your skill level.
+          </Text>
+        </View>
+      )}
 
 
-      <TouchableOpacity
+<TouchableOpacity
         style={[styles.startBtn, !(selectedHobby && selectedSkill) && { opacity: 0.4 }]}
         disabled={!(selectedHobby && selectedSkill)}
         onPress={handleStart}
+        accessible
+        accessibilityLabel="Start planning"
       >
         <Text style={styles.startText}>Start</Text>
         <Icon name="arrow-right" size={18} color="#fff" />
       </TouchableOpacity>
 
       <Modal
-  isVisible={isModalVisible}
-  onBackdropPress={() => setModalVisible(false)}
-  style={styles.modal}
->
-  <View style={styles.modalContent}>
-    <Text style={styles.modalTitle}>Pick your skill level</Text>
+        isVisible={isModalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Pick your skill level</Text>
 
-    <View style={styles.skillGrid}>
-      {skillLevels.map((level, idx) => (
-        <TouchableOpacity
-          key={idx}
-          style={[
-            styles.skillTile,
-            selectedSkill === level && styles.selectedSkillTile,
-          ]}
-          onPress={() => handleSkillSelect(level)}
-        >
-          <Text style={styles.skillLabel}>{level}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  </View>
-</Modal>
+          <View style={styles.skillGrid}>
+            {SKILL_LEVELS.map((level, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={[
+                  styles.skillTile,
+                  selectedSkill === level && styles.selectedSkillTile,
+                ]}
+                onPress={() => handleSkillSelect(level)}
+                accessible
+                accessibilityLabel={`Select skill level ${level}`}
+              >
+                <Text style={styles.skillLabel}>{level}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </Modal>
 
     </View>
   );
